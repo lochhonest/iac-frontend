@@ -1,305 +1,445 @@
 <template>
   <div class="jumbotron vertical-center">
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-12">
-          <h1>Accounts</h1>
-          <hr />
-          <br />
-          <!-- Allert Message -->
-          <b-alert v-if="showMessage" variant="success" show>{{
-            message
-          }}</b-alert>
-          <!-- b-alert v-if="error" variant="danger" show>{{ error }}</b-alert-->
+      <div class = "container">
+          <div class = "row">
+              <div class = "col-sm-12">
+                  <h1>Recipes</h1>
+                  <hr />
+                  <!-- Allert Message -->
+        <b-alert v-if="showMessage" variant="success" show>{{
+          message
+        }}</b-alert>
+        <!-- b-alert v-if="error" variant="danger" show>{{ error }}</b-alert-->
 
-          <button
-            type="button"
-            class="btn btn-success btn-sm"
-            v-b-modal.account-modal
+        <button
+          type="button"
+          class="btn btn-success btn-sm"
+          v-b-modal.recipe-modal
+        >
+          Create 
+        </button>
+                  <br /> <br />
+                  <table class = "table table-hover">
+                      <thead>
+                          <tr>
+                              <th scope = "col"> Recipe Name </th>
+                              <th scope = "col"> Recipe Ingredients </th>
+                              <th scope = "col"> Recipe Instructions </th>
+                              <th scope = "col"> Recipe Favorite </th>
+                              <th scope = "col"> Recipe Rating </th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr v-for= "recipe in recipes" :key = "recipe.id">
+                              <td> {{ recipe.name }} </td>
+                              <td> {{ recipe.ingredients }} </td>
+                              <td> {{ recipe.instructions }} </td>
+                              <td>
+                                  <b-icon 
+                                  v-if="recipe.favorite == true" icon="heart-fill">
+                                  </b-icon>
+                                  <b-icon v-if="(recipe.favorite == false)" icon="heart">
+                                  </b-icon>
+                              </td>
+                                <td> 
+                                    <div>
+                                        <b-form-rating v-model= "recipe.rating" readonly variant="warning" class="mb-2"></b-form-rating>
+                                        <p class="mt-2"></p>
+                                    </div> 
+                                 </td>
+                              
+                               <td> 
+                                  <div class="btn-group" role="group">
+                                      <button
+                                      type="button"
+                                      class="btn btn-info btn-sm"
+                                      v-b-modal.edit-recipe-modal
+                                      @click="editRecipe(recipe)"
+                                      >
+                                      Edit
+                                      </button>
+                                      <button
+                                      type="button"
+                                      class="btn btn-danger btn-sm"
+                                      @click="deleteRecipe(recipe)"
+                                      >
+                                      Delete
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+                  <footer class = "text-center">
+                  </footer>
+              
+              </div>
+          </div>
+          <!-- Beginning of Modal for Create -->
+              <div>   <b-modal 
+              ref = "addRecipeModal"
+              id="recipe-modal"
+              title="Add Recipe"
+              hide-backdrop
+              hide-footer
+              >
+              <b-form @submit="onSubmit" class="w-100">
+              <b-form-group
+                  id="name"
+              label="Recipe Name:"
+              label-for="name"
+              description="Name of the recipe."
+              >
+              <b-form-input
+              id="name"
+              type="text"
+              v-model="createRecipeForm.name"
+              placeholder="name"
+              required
+              >
+              </b-form-input>
+              </b-form-group>
+              <b-form-group
+              id="ingredients"
+              label="Recipe Ingredients:"
+              label-for="ingredients"
+              description="Ingredients of the recipe."
+              >
+              <b-form-input
+              id="ingredients"
+              type="text"
+              v-model="createRecipeForm.ingredients"
+              placeholder="ingredients"
+              required
+              ></b-form-input>
+              </b-form-group>
+              <b-form-group
+              id="instructions"
+              label="Recipe Instructions:"
+              label-for="instructions"
+              description="Instructions of the recipe."
+              >
+              <b-form-input
+              id="instructions"
+              type="text"
+              v-model="createRecipeForm.instructions"
+              placeholder="Recipe Instructions"
+              required
+              ></b-form-input>
+              </b-form-group>
+              <b-form-group
+              id="form-favorite-group"    
+              label="Recipe Favorite:"
+              label-for="form-edit-favorite-input"
+              description="favorite this recipe"
+              >
+              <b-form-checkbox
+              id="form-favorite-input"
+              v-model="createRecipeForm.favorite"
+              switch
+              ></b-form-checkbox>
+              </b-form-group>
+              <b-form-group
+              id="rating"
+              label="Recipe Rating:"
+              label-for="form-rating-input"
+              description="Rate this recipe from 1-5"
+              >
+              <b-form-rating
+              id="rating"
+              type="integer"
+              v-model="createRecipeForm.rating"
+              ></b-form-rating>
+              </b-form-group>
+              <b-button type="submit" variant="primary">Submit</b-button>
+              </b-form>
+          </b-modal>
+
+          <!-- End of Modal for Create Recipe-->
+
+          <!-- Beginning of Modal for Edit Recipe-->
+          <b-modal
+          ref = "editRecipeModal"
+          id="edit-recipe-modal"
+          title="Edit Recipe"
+          hide-backdrop
+          hide-footer
           >
-            Create Account
-          </button>
-          <br /><br />
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Account Name</th>
-                <th scope="col">Account Number</th>
-                <th scope="col">Account Balance</th>
-                <th scope="col">Account Currency</th>
-                <th scope="col">Account Status</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="account in accounts" :key="account.id">
-                <td>{{ account.name }}</td>
-                <td>{{ account.account_number }}</td>
-                <td>{{ account.balance }}</td>
-                <td>{{ account.currency }}</td>
-                <td>
-                  <span
-                    v-if="account.status == 'Active'"
-                    class="badge badge-success"
-                    >{{ account.status }}</span
-                  >
-                  <span v-else class="badge badge-danger">{{
-                    account.status
-                  }}</span>
-                </td>
-                <td>
-                  <div class="btn-group" role="group">
-                    <button
-                      type="button"
-                      class="btn btn-info btn-sm"
-                      v-b-modal.edit-account-modal
-                      @click="editAccount(account)"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-danger btn-sm"
-                      @click="deleteAccount(account)"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <footer class="text-center">
-            Copyright &copy; All Rights Reserved.
-          </footer>
-        </div>
+          <b-form @submit="onSubmitUpdate" class="w-100">
+          <b-form-group
+          id="form-name-group"
+          label="name:"
+          label-for="form-name-input"
+          description="Enter the name of the recipe."
+          >
+          <b-form-input
+          id="form-name-input"
+          type="text"
+          v-model="updateRecipeForm.name"
+          placeholder="name"
+          
+          >
+          </b-form-input>
+          </b-form-group>
+          <b-form-group
+          id="form-ingredients-group"
+          label="ingredients:"
+          label-for="form-ingredients-input"
+          description="Enter the ingredients of the recipe."
+          >
+          <b-form-input
+          id="form-ingredients-input"
+          type="text"
+          v-model="updateRecipeForm.ingredients"
+          placeholder="ingredients"
+          >
+          </b-form-input>
+          </b-form-group>
+          <b-form-group
+          id="form-instructions-group"
+          label="Recipe Instructions:"
+          label-for="form-instructions-input"
+          description="Enter the instructions of the recipe."
+          >
+          <b-form-input
+
+          id="form-instructions-input"
+          type="text"
+          v-model="updateRecipeForm.instructions"
+          placeholder="Recipe Instructions"
+          >
+          </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+
+          id="form-favorite-group"
+          label="Recipe Favorite:"
+          label-for="form-favorite-input"
+          description="Let us know if you want to favorite this recipe"
+          >
+          <b-form-checkbox
+          id="form-favorite-input"
+          v-model="updateRecipeForm.favorite"
+          switch
+          ></b-form-checkbox>
+          </b-form-group>
+          <b-form-group
+          id="form-rating-group"
+          label="Recipe Rating:"
+          label-for="form-rating-input"
+          description="Rate this recipe from 1-5"
+          >
+          <b-form-rating
+          id="form-rating-input"
+          type="integer"
+          v-model="updateRecipeForm.rating"
+          ></b-form-rating>
+          </b-form-group>
+  
+          <b-button type="submit" variant="primary">Update</b-button>
+          </b-form>
+          </b-modal>
+          <!-- End of Modal for Edit Recipe-->
+
       </div>
-      <b-modal
-        ref="addAccountModal"
-        id="account-modal"
-        title="Create a new account"
-        hide-backdrop
-        hide-footer
-      >
-        <b-form @submit="onSubmit" class="w-100">
-          <b-form-group
-            id="form-name-group"
-            label="Account Name:"
-            label-for="form-name-input"
-          >
-            <b-form-input
-              id="form-name-input"
-              type="text"
-              v-model="createAccountForm.name"
-              placeholder="Account Name"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="form-currency-group"
-            label="Currency:"
-            label-for="form-currency-input"
-          >
-            <b-form-input
-              id="form-currency-input"
-              type="text"
-              v-model="createAccountForm.currency"
-              placeholder="$ or €"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-
-          <b-button type="submit" variant="outline-info">Submit</b-button>
-        </b-form>
-      </b-modal>
-      <!-- End of Modal for Create Account-->
-      <!-- Start of Modal for Edit Account-->
-      <b-modal
-        ref="editAccountModal"
-        id="edit-account-modal"
-        title="Edit the account"
-        hide-backdrop
-        hide-footer
-      >
-        <b-form @submit="onSubmitUpdate" class="w-100">
-          <b-form-group
-            id="form-edit-name-group"
-            label="Account Name:"
-            label-for="form-edit-name-input"
-          >
-            <b-form-input
-              id="form-edit-name-input"
-              type="text"
-              v-model="editAccountForm.name"
-              placeholder="Account Name"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-          <b-button type="submit" variant="outline-info">Update</b-button>
-        </b-form>
-      </b-modal>
-      <!-- End of Modal for Edit Account-->
-    </div>
+      
+  
   </div>
+</div>
+ 
+  
+
 </template>
 
+
 <script>
-import axios from "axios";
-export default {
-  name: "AppAccounts",
-  data() {
-    return {
-      accounts: [],
-      createAccountForm: {
-        name: "",
-        currency: "",
+  
+  
+  import axios from 'axios';
+  export default
+  {
+    name: 'AppRecipes',
+    data()
+    {
+        return {
+            recipes: [],
+            createRecipeForm: {
+                name: '',
+                ingredients: '',
+                instructions: '',
+                favorite: false,
+                rating: 0
+            },
+  
+            updateRecipeForm: {
+                name: '',
+                ingredients: '',
+                instructions: '',
+                favorite: false,
+                rating: 0
+            },
+  
+            showMessage: false,
+            message: '',
+  
+        };
+    },
+    methods: {
+  
+      
+      
+        //GET Recipes
+        RESTgetRecipes() {
+        const path = `${process.env.VUE_APP_ROOT_URL}/recipe`;
+        axios
+            .get(path)
+            .then((response) => {
+                this.recipes = response.data.recipe;
+                this.message = response.data.recipe;
+                    // To actually show the message
+                    this.showMessage = true;
+                    // To hide the message after 5 seconds
+                    setTimeout(() => {
+                      this.showMessage = false;
+                    }, 100000);
+            }
+            )
+            .catch((error) => {
+                console.log(error);
+            });
+        },
+  
+        //POST Recipes
+        RESTcreateRecipe(payload){
+            const path = `${process.env.VUE_APP_ROOT_URL}/recipes`;
+            axios
+                .post(path,payload)
+                .then((response) => {
+                    this.RESTgetRecipes();
+                    this.message = "Recipe Created succesfully!";
+                    // To actually show the message
+                    this.showMessage = true;
+                    // To hide the message after 5 seconds
+                    setTimeout(() => {
+                      this.showMessage = false;
+                    }, 50000);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.RESTgetRecipes()
+                });
+        },
+  
+        RESTupdateRecipe(payload, id){
+            const path = `${process.env.VUE_APP_ROOT_URL}/recipe`;
+            axios
+                .put(path,payload)
+                .then((response) => {
+                    this.RESTgetRecipes();
+  
+                      this.message = "Recipe Updated Successfully"
+                      this.showMessage = true;
+                      setTimeout(() => {
+                          this.showMessage = false;
+                      }, 3000);
+                      
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.RESTgetRecipes()
+                });
+        },
+  
+  
+        RESTdeleteRecipe(id){
+            const path = `${process.env.VUE_APP_ROOT_URL}/recipes`;
+            axios
+                .delete(path)
+                .then((response) => {
+                    this.RESTgetRecipes();
+                    this.message = "Recipe Deleted Successfully"
+                    this.showMessage = true;
+                    set.TimeOut(() => {
+                        this.showMessage = false;
+                    }, 3000);
+  
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.RESTgetRecipes()
+                });
+        },
+  
+        initForm(){
+            this.createRecipeForm = {
+                name: '',
+                ingredients: '',
+                instructions: '',
+                favorite: false,
+                rating: 0
+            };
+            this.updateRecipeForm = {
+                name: '',
+                ingredients: '',
+                instructions: '',
+                favorite: false,
+                rating: 0
+            };
+  
+        },
+        onSubmit(e) {
+            e.preventDefault(); 
+            this.$refs.addRecipeModal.hide(); 
+            const payload = {
+                name: this.createRecipeForm.name,
+                ingredients: this.createRecipeForm.ingredients,
+                instructions: this.createRecipeForm.instructions,
+                favorite: this.createRecipeForm.favorite,
+                rating: this.createRecipeForm.rating
+            };
+            this.RESTcreateRecipe(payload);
+            this.initForm();
+        },
+        onSubmitUpdate(e) {
+          e.preventDefault(); 
+          this.$refs.editRecipeModal.hide(); 
+          const payload = {
+              name: this.updateRecipeForm.name,
+              ingredients: this.updateRecipeForm.ingredients,
+              instructions: this.updateRecipeForm.instructions,
+              favorite: this.updateRecipeForm.favorite,
+              rating: this.updateRecipeForm.rating
+          };
+          this.RESTupdateRecipe(payload, this.updateRecipeForm.id);
+          this.initForm();
       },
-      editAccountForm: {
-        id: "",
-        name: "",
-      },
-      showMessage: false,
-      message: "",
-    };
-  },
-  methods: {
-    /***************************************************
-     * RESTful requests
-     ***************************************************/
-
-    //GET function
-    RESTgetAccounts() {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts`;
-      axios
-        .get(path)
-        .then((response) => {
-          this.accounts = response.data.accounts;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+  
+        deleteRecipe(recipe) {
+            this.RESTdeleteRecipe(recipe.id);
+        },
+  
+        editRecipe(recipe) {
+            this.updateRecipeForm = recipe;
+        },
+  
+        
+  
     },
-
-    // POST function
-    RESTcreateAccount(payload) {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts`;
-      axios
-        .post(path, payload)
-        .then((response) => {
-          this.RESTgetAccounts();
-          // For message alert
-          this.message = "Account Created succesfully!";
-          // To actually show the message
-          this.showMessage = true;
-          // To hide the message after 3 seconds
-          setTimeout(() => {
-            this.showMessage = false;
-          }, 3000);
-        })
-        .catch((error) => {
-          console.error(error);
-          this.RESTgetAccounts();
-        });
+   
+  
+    created() {
+        this.RESTgetRecipes();
     },
+  };
+  
+  </script>
+<style>
+.vertical-center {
+  min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+  min-height: 100vh; /* These two lines are counted as one :-)       */
 
-    // Update function
-    RESTupdateAccount(payload, accountId) {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
-      axios
-        .put(path, payload)
-        .then((response) => {
-          this.RESTgetAccounts();
-          // For message alert
-          this.message = "Account Updated succesfully!";
-          // To actually show the message
-          this.showMessage = true;
-          // To hide the message after 3 seconds
-          setTimeout(() => {
-            this.showMessage = false;
-          }, 3000);
-        })
-        .catch((error) => {
-          console.error(error);
-          this.RESTgetAccounts();
-        });
-    },
-
-    // Delete account
-    RESTdeleteAccount(accountId) {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
-      axios
-        .delete(path)
-        .then((response) => {
-          this.RESTgetAccounts();
-          // For message alert
-          this.message = "Account Deleted succesfully!";
-          // To actually show the message
-          this.showMessage = true;
-          // To hide the message after 3 seconds
-          setTimeout(() => {
-            this.showMessage = false;
-          }, 3000);
-        })
-        .catch((error) => {
-          console.error(error);
-          this.RESTgetAccounts();
-        });
-    },
-
-    /***************************************************
-     * FORM MANAGEMENT
-     * *************************************************/
-
-    // Initialize forms empty
-    initForm() {
-      this.createAccountForm.name = "";
-      this.createAccountForm.currency = "";
-      this.editAccountForm.id = "";
-      this.editAccountForm.name = "";
-    },
-
-    // Handle submit event for create account
-    onSubmit(e) {
-      e.preventDefault(); //prevent default form submit form the browser
-      this.$refs.addAccountModal.hide(); //hide the modal when submitted
-      const payload = {
-        name: this.createAccountForm.name,
-        currency: this.createAccountForm.currency,
-      };
-      this.RESTcreateAccount(payload);
-      this.initForm();
-    },
-
-    // Handle submit event for edit account
-    onSubmitUpdate(e) {
-      e.preventDefault(); //prevent default form submit form the browser
-      this.$refs.editAccountModal.hide(); //hide the modal when submitted
-      const payload = {
-        name: this.editAccountForm.name,
-      };
-      this.RESTupdateAccount(payload, this.editAccountForm.id);
-      this.initForm();
-    },
-
-    // Handle edit button
-    editAccount(account) {
-      this.editAccountForm = account;
-    },
-
-    // Handle Delete button
-    deleteAccount(account) {
-      this.RESTdeleteAccount(account.id);
-    },
-  },
-
-  /***************************************************
-   * LIFECYClE HOOKS
-   ***************************************************/
-  created() {
-    this.RESTgetAccounts();
-  },
-};
-</script>
+  display: flex;
+  align-items: center;
+}
+</style>
