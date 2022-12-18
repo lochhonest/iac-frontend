@@ -296,7 +296,7 @@
               .get(path)
               .then((response) => {
                   this.recipes = response.data.recipe;
-                  this.message = response.data.recipe;
+                  
                       // To actually show the message
                       this.showMessage = true;
                       // To hide the message after 5 seconds
