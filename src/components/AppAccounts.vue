@@ -314,7 +314,7 @@
 
           //POST Recipes
           RESTcreateRecipe(payload){
-              const path = `${process.env.VUE_APP_ROOT_URL}/recipe`;
+              const path = `${process.env.VUE_APP_ROOT_URL}/recipes`;
               axios
                   .post(path,payload)
                   .then((response) => {
@@ -355,7 +355,7 @@
 
 
           RESTdeleteRecipe(id){
-              const path = `${process.env.VUE_APP_ROOT_URL}/recipe/${id}`;
+              const path = `${process.env.VUE_APP_ROOT_URL}/recipes/${id}`;
               axios
                   .delete(path)
                   .then((response) => {
